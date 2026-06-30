@@ -11,6 +11,9 @@ final class StatusItemController: NSObject {
     private let popover = NSPopover()
     private var cancellables = Set<AnyCancellable>()
     private var keyboardMonitor: Any?
+    private var localMouseMonitor: Any?
+    private var globalMouseMonitor: Any?
+    private var resignActiveObserver: NSObjectProtocol?
 
     init(
         model: AppModel,
@@ -71,11 +74,11 @@ final class StatusItemController: NSObject {
         guard let button = statusItem.button else { return }
         popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
         NSApp.activate(ignoringOtherApps: true)
-        installKeyboardMonitor()
+        installDismissMonitors()
     }
 
-    private func installKeyboardMonitor() {
-        removeKeyboardMonitor()
+    private func installDismissMonitors() {
+        removeDismissMonitors()
 
         keyboardMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
             guard let self else { return event }
@@ -89,12 +92,71 @@ final class StatusItemController: NSObject {
 
             return event
         }
+
+        localMouseMonitor = NSEvent.addLocalMonitorForEvents(
+            matching: [.leftMouseDown, .rightMouseDown, .otherMouseDown]
+        ) { [weak self] event in
+            guard let self else { return event }
+
+            if self.shouldKeepPopoverOpen(for: event) {
+                return event
+            }
+
+            self.popover.performClose(nil)
+            return event
+        }
+
+        globalMouseMonitor = NSEvent.addGlobalMonitorForEvents(
+            matching: [.leftMouseDown, .rightMouseDown, .otherMouseDown]
+        ) { [weak self] _ in
+            Task { @MainActor in
+                self?.popover.performClose(nil)
+            }
+        }
+
+        resignActiveObserver = NotificationCenter.default.addObserver(
+            forName: NSApplication.didResignActiveNotification,
+            object: NSApp,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in
+                self?.popover.performClose(nil)
+            }
+        }
     }
 
-    private func removeKeyboardMonitor() {
+    private func shouldKeepPopoverOpen(for event: NSEvent) -> Bool {
+        if event.window == popover.contentViewController?.view.window {
+            return true
+        }
+
+        guard let button = statusItem.button, event.window == button.window else {
+            return false
+        }
+
+        let point = button.convert(event.locationInWindow, from: nil)
+        return button.bounds.contains(point)
+    }
+
+    private func removeDismissMonitors() {
         if let keyboardMonitor {
             NSEvent.removeMonitor(keyboardMonitor)
             self.keyboardMonitor = nil
+        }
+
+        if let localMouseMonitor {
+            NSEvent.removeMonitor(localMouseMonitor)
+            self.localMouseMonitor = nil
+        }
+
+        if let globalMouseMonitor {
+            NSEvent.removeMonitor(globalMouseMonitor)
+            self.globalMouseMonitor = nil
+        }
+
+        if let resignActiveObserver {
+            NotificationCenter.default.removeObserver(resignActiveObserver)
+            self.resignActiveObserver = nil
         }
     }
 
@@ -127,6 +189,6 @@ final class StatusItemController: NSObject {
 
 extension StatusItemController: NSPopoverDelegate {
     func popoverDidClose(_ notification: Notification) {
-        removeKeyboardMonitor()
+        removeDismissMonitors()
     }
 }

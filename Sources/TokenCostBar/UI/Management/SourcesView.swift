@@ -28,9 +28,11 @@ struct SourcesView: View {
             Button {
                 model.refresh()
             } label: {
-                RefreshButtonLabel(isRefreshing: model.isRefreshing)
+                RefreshGlyph(isRefreshing: model.isRefreshing, size: 14)
+                    .frame(width: 32, height: 32)
             }
-            .buttonStyle(GeistButtonStyle(kind: .secondary, height: 32))
+            .buttonStyle(GeistButtonStyle(kind: .icon, height: 32))
+            .help(model.isRefreshing ? "刷新中" : "刷新数据")
         }
     }
 

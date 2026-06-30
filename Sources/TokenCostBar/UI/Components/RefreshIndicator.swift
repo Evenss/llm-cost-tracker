@@ -22,16 +22,3 @@ struct RefreshGlyph: View {
         return progress * 360
     }
 }
-
-struct RefreshButtonLabel: View {
-    let isRefreshing: Bool
-    var title = "刷新"
-    var inProgressTitle = "刷新中"
-
-    var body: some View {
-        HStack(spacing: Geist.Spacing.x2) {
-            RefreshGlyph(isRefreshing: isRefreshing, size: 12)
-            Text(isRefreshing ? inProgressTitle : title)
-        }
-    }
-}

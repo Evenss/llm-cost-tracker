@@ -79,18 +79,10 @@ struct SourcesView: View {
 
     private func sourceRow(_ source: SourceState) -> some View {
         HStack(spacing: 16) {
-            VStack(alignment: .leading, spacing: 3) {
-                Text(source.displayName)
-                    .font(Geist.Fonts.label14.weight(.semibold))
-                    .foregroundStyle(Geist.Colors.primary)
-                    .lineLimit(1)
-
-                Text(detailText(source))
-                    .font(Geist.Fonts.mono12)
-                    .foregroundStyle(source.status == .error ? Geist.Colors.red : Geist.Colors.secondary)
-                    .lineLimit(1)
-                    .truncationMode(.middle)
-            }
+            Text(source.displayName)
+                .font(Geist.Fonts.label14.weight(.semibold))
+                .foregroundStyle(Geist.Colors.primary)
+                .lineLimit(1)
             .frame(maxWidth: .infinity, alignment: .leading)
 
             Text(source.isEnabled ? "已启用" : "已停用")
@@ -98,11 +90,11 @@ struct SourcesView: View {
                 .foregroundStyle(source.isEnabled ? Geist.Colors.primary : Geist.Colors.secondary)
                 .frame(width: 90, alignment: .leading)
 
-            GeistStatusBadge(text: statusText(source.status), color: statusColor(source.status))
+            SourceStatusDot(status: source.status, color: statusColor(source.status))
                 .frame(width: 112, alignment: .leading)
         }
         .padding(.horizontal, 16)
-        .frame(minHeight: 58)
+        .frame(minHeight: 52)
     }
 
     private var emptyState: some View {
@@ -112,41 +104,46 @@ struct SourcesView: View {
             .frame(maxWidth: .infinity, minHeight: 96, alignment: .center)
     }
 
-    private func detailText(_ source: SourceState) -> String {
-        if let message = source.message, !message.isEmpty {
-            return message
-        }
-
-        if let path = source.path, !path.isEmpty {
-            return path
-        }
-
-        return source.source.defaultRelativePath
-    }
-
-    private func statusText(_ status: SourceStatus) -> String {
-        switch status {
-        case .ready:
-            "可读取"
-        case .missing:
-            "未找到"
-        case .disabled:
-            "已停用"
-        case .error:
-            "错误"
-        }
-    }
-
     private func statusColor(_ status: SourceStatus) -> Color {
         switch status {
         case .ready:
-            Geist.Colors.blue
+            Geist.Colors.green
         case .missing:
             Geist.Colors.secondary
         case .disabled:
             Geist.Colors.secondary
         case .error:
             Geist.Colors.red
+        }
+    }
+}
+
+private struct SourceStatusDot: View {
+    let status: SourceStatus
+    let color: Color
+
+    var body: some View {
+        Circle()
+            .fill(color)
+            .frame(width: 10, height: 10)
+            .overlay {
+                Circle()
+                    .stroke(Geist.Colors.border, lineWidth: 1)
+            }
+            .help(helpText)
+            .accessibilityLabel(helpText)
+    }
+
+    private var helpText: String {
+        switch status {
+        case .ready:
+            "可运行"
+        case .missing:
+            "未找到"
+        case .disabled:
+            "已停用"
+        case .error:
+            "错误"
         }
     }
 }

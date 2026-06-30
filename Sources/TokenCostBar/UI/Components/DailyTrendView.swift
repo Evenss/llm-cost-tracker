@@ -54,7 +54,7 @@ struct DailyTrendView: View {
                     }
                 }
             }
-            .frame(height: compact ? 92 : 166)
+            .frame(height: compact ? 84 : 166)
             .background(compact ? Geist.Colors.background : Geist.Colors.backgroundSecondary)
             .clipShape(RoundedRectangle(cornerRadius: Geist.Radius.small, style: .continuous))
             .overlay(

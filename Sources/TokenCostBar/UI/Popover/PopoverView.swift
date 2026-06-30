@@ -6,19 +6,19 @@ struct PopoverView: View {
     let openManagement: (ManagementTab) -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: Geist.Spacing.x3) {
             todaySection
             trendSection
             agentsSection
             footer
         }
-        .padding(16)
-        .frame(width: 390, height: 430, alignment: .topLeading)
+        .padding(Geist.Spacing.x4)
+        .frame(width: 390, height: 444, alignment: .topLeading)
         .background(Geist.Colors.background)
     }
 
     private var todaySection: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: Geist.Spacing.x2) {
             sectionHead(title: "今日") {
                 Button {
                     model.refresh()
@@ -50,7 +50,7 @@ struct PopoverView: View {
     }
 
     private var trendSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: Geist.Spacing.x2) {
             sectionHead(title: "每日趋势") {
                 Text("最近 7 天")
                     .font(Geist.Fonts.label12)
@@ -58,8 +58,8 @@ struct PopoverView: View {
             }
 
             DailyTrendView(days: model.snapshot.dailyTrend, compact: true)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 8)
+                .padding(.horizontal, Geist.Spacing.x3)
+                .padding(.vertical, Geist.Spacing.x2)
                 .background(Geist.Colors.background)
                 .clipShape(RoundedRectangle(cornerRadius: Geist.Radius.small, style: .continuous))
                 .overlay(
@@ -70,7 +70,7 @@ struct PopoverView: View {
     }
 
     private var agentsSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: Geist.Spacing.x2) {
             sectionHead(title: "AI Agent") {
                 Text("\(model.snapshot.agentTotals.count) 个来源")
                     .font(Geist.Fonts.label12)
@@ -111,29 +111,29 @@ struct PopoverView: View {
     }
 
     private var footer: some View {
-        HStack(spacing: 8) {
-            Text("\(model.snapshot.lastUpdatedAt.formatted(date: .omitted, time: .shortened)) 已同步")
-                .font(Geist.Fonts.mono12)
-                .foregroundStyle(Geist.Colors.secondary)
-                .monospacedDigit()
+        VStack(spacing: Geist.Spacing.x3) {
+            Divider()
+                .overlay(Geist.Colors.separator)
 
-            Spacer()
+            HStack(spacing: Geist.Spacing.x2) {
+                Text("\(model.snapshot.lastUpdatedAt.formatted(date: .omitted, time: .shortened)) 已同步")
+                    .font(Geist.Fonts.mono12)
+                    .foregroundStyle(Geist.Colors.secondary)
+                    .monospacedDigit()
 
-            HStack(spacing: 8) {
-                footerButton("☰", help: "来源管理") {
-                    openManagement(.sources)
-                }
+                Spacer()
 
-                footerButton("⌁", help: "统计详情") {
-                    openManagement(.stats)
+                HStack(spacing: Geist.Spacing.x2) {
+                    footerButton("☰", help: "来源管理") {
+                        openManagement(.sources)
+                    }
+
+                    footerButton("⌁", help: "统计详情") {
+                        openManagement(.stats)
+                    }
                 }
             }
-        }
-        .padding(.top, 2)
-        .overlay(alignment: .top) {
-            Divider()
-                .overlay(Geist.Colors.border)
-                .offset(y: -8)
+            .frame(height: 32)
         }
     }
 

@@ -1,68 +1,54 @@
 import SwiftUI
 
+final class ManagementNavigation: ObservableObject {
+    @Published var selectedTab: ManagementTab
+
+    init(selectedTab: ManagementTab = .sources) {
+        self.selectedTab = selectedTab
+    }
+}
+
 struct ManagementView: View {
     @ObservedObject var model: AppModel
-    @State private var selectedTab = ManagementTab.sources
+    @ObservedObject var navigation: ManagementNavigation
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            fixedHeader
+        ScrollView {
+            VStack(alignment: .leading, spacing: 24) {
+                header
 
-            ScrollView {
-                Group {
-                    switch selectedTab {
-                    case .sources:
-                        SourcesView(model: model)
-                    case .stats:
-                        StatsView(model: model)
-                    }
+                switch navigation.selectedTab {
+                case .sources:
+                    SourcesView(model: model)
+                case .stats:
+                    StatsView(model: model)
                 }
-                .frame(maxWidth: .infinity, alignment: .topLeading)
-                .padding(.horizontal, Geist.Spacing.x6)
-                .padding(.bottom, Geist.Spacing.x6)
             }
-            .scrollIndicators(.automatic)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .padding(24)
+            .frame(maxWidth: .infinity, alignment: .topLeading)
         }
+        .scrollIndicators(.automatic)
         .frame(minWidth: 680, minHeight: 480)
         .background(Geist.Colors.background)
     }
 
-    private var fixedHeader: some View {
-        VStack(alignment: .leading, spacing: Geist.Spacing.x4) {
-            header
-            tabBar
-        }
-        .padding(Geist.Spacing.x6)
-        .padding(.bottom, Geist.Spacing.x4)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Geist.Colors.background)
-        .overlay(alignment: .bottom) {
-            Divider()
-                .overlay(Geist.Colors.separator)
-        }
-        .fixedSize(horizontal: false, vertical: true)
-        .layoutPriority(10)
-    }
-
     private var header: some View {
-        HStack(alignment: .firstTextBaseline) {
-            VStack(alignment: .leading, spacing: Geist.Spacing.x1) {
-                Text("TokenCostBar")
+        HStack(alignment: .top, spacing: 16) {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("管理")
                     .font(Geist.Fonts.heading20)
                     .foregroundStyle(Geist.Colors.primary)
 
-                Text("Local token spend, summarized quietly.")
-                    .font(Geist.Fonts.label13)
-                    .foregroundStyle(Geist.Colors.secondary)
+                if navigation.selectedTab == .sources {
+                    Text("低频设置只保留本地来源状态和同步结果。")
+                        .font(Geist.Fonts.label13)
+                        .foregroundStyle(Geist.Colors.secondary)
+                }
             }
 
-            Spacer()
+            Spacer(minLength: 16)
 
-            Text(model.snapshot.lastUpdatedAt.formatted(date: .omitted, time: .shortened))
-                .font(Geist.Fonts.mono12)
-                .foregroundStyle(Geist.Colors.secondary)
-                .monospacedDigit()
+            tabBar
         }
     }
 
@@ -82,30 +68,25 @@ struct ManagementView: View {
     }
 
     private func tabButton(_ tab: ManagementTab) -> some View {
-        let isSelected = selectedTab == tab
+        let isSelected = navigation.selectedTab == tab
 
         return Button {
-            selectedTab = tab
+            navigation.selectedTab = tab
         } label: {
-            HStack(spacing: Geist.Spacing.x2) {
-                Image(systemName: tab.systemImage)
-                    .font(.system(size: 13, weight: .semibold))
-
-                Text(tab.title)
-                    .font(Geist.Fonts.button14)
-            }
-            .foregroundStyle(isSelected ? Geist.Colors.primary : Geist.Colors.secondary)
-            .frame(width: 104, height: 32)
-            .background(isSelected ? Geist.Colors.neutral : .clear)
-            .clipShape(RoundedRectangle(cornerRadius: Geist.Radius.small, style: .continuous))
-            .contentShape(RoundedRectangle(cornerRadius: Geist.Radius.small, style: .continuous))
+            Text(tab.title)
+                .font(Geist.Fonts.button14)
+                .foregroundStyle(isSelected ? Geist.Colors.primary : Geist.Colors.secondary)
+                .frame(width: 104, height: 32)
+                .background(isSelected ? Geist.Colors.neutral : .clear)
+                .clipShape(RoundedRectangle(cornerRadius: Geist.Radius.small, style: .continuous))
+                .contentShape(RoundedRectangle(cornerRadius: Geist.Radius.small, style: .continuous))
         }
         .buttonStyle(.plain)
         .help(tab.title)
     }
 }
 
-private enum ManagementTab: String, CaseIterable, Identifiable {
+enum ManagementTab: String, CaseIterable, Identifiable {
     case sources
     case stats
 
@@ -114,18 +95,9 @@ private enum ManagementTab: String, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .sources:
-            "Sources"
+            "来源"
         case .stats:
-            "Stats"
-        }
-    }
-
-    var systemImage: String {
-        switch self {
-        case .sources:
-            "tray.full"
-        case .stats:
-            "chart.line.uptrend.xyaxis"
+            "统计"
         }
     }
 }

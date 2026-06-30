@@ -3,90 +3,93 @@ import TokenCostBarCore
 
 struct PopoverView: View {
     @ObservedObject var model: AppModel
-    let openManagement: () -> Void
-    let quit: () -> Void
+    let openManagement: (ManagementTab) -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: Geist.Spacing.x4) {
+        VStack(alignment: .leading, spacing: 16) {
             todaySection
-
-            Divider()
-                .overlay(Geist.Colors.separator)
-
-            DailyTrendView(days: model.snapshot.dailyTrend, compact: true)
-                .frame(height: 112)
-
-            Divider()
-                .overlay(Geist.Colors.separator)
-
+            trendSection
             agentsSection
-
-            Spacer(minLength: 0)
             footer
         }
-        .padding(Geist.Spacing.x4)
-        .frame(width: 390, height: 392)
+        .padding(16)
+        .frame(width: 390, height: 430, alignment: .topLeading)
         .background(Geist.Colors.background)
     }
 
     private var todaySection: some View {
-        VStack(alignment: .leading, spacing: Geist.Spacing.x2) {
-            HStack {
-                Text("Today")
-                    .font(Geist.Fonts.heading14)
-                    .foregroundStyle(Geist.Colors.primary)
-
-                Spacer()
-
+        VStack(alignment: .leading, spacing: 10) {
+            sectionHead(title: "今日") {
                 Button {
                     model.refresh()
                 } label: {
-                    Label(model.isRefreshing ? "Refreshing…" : "Refresh Data", systemImage: "arrow.clockwise")
-                        .labelStyle(.iconOnly)
+                    Text(model.isRefreshing ? "✓" : "↻")
+                        .frame(width: 32, height: 32)
                 }
                 .buttonStyle(GeistButtonStyle(kind: .icon, height: 32))
                 .disabled(model.isRefreshing)
-                .help(model.isRefreshing ? "Refreshing…" : "Refresh Data")
+                .help(model.isRefreshing ? "刷新中" : "刷新数据")
             }
 
-            HStack(alignment: .firstTextBaseline) {
+            HStack(alignment: .lastTextBaseline, spacing: 12) {
                 Text(MoneyFormatter.usd(model.snapshot.todayUSD))
-                    .font(.system(size: 32, weight: .semibold, design: .monospaced))
+                    .font(.system(size: 36, weight: .bold, design: .monospaced))
                     .foregroundStyle(Geist.Colors.primary)
                     .monospacedDigit()
                     .lineLimit(1)
-                    .minimumScaleFactor(0.75)
+                    .minimumScaleFactor(0.72)
 
-                Spacer()
+                Spacer(minLength: 8)
 
                 Text(MoneyFormatter.cny(model.snapshot.todayCNY))
                     .font(Geist.Fonts.mono14)
                     .foregroundStyle(Geist.Colors.secondary)
                     .monospacedDigit()
+                    .lineLimit(1)
             }
         }
     }
 
+    private var trendSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            sectionHead(title: "每日趋势") {
+                Text("最近 7 天")
+                    .font(Geist.Fonts.label12)
+                    .foregroundStyle(Geist.Colors.secondary)
+            }
+
+            DailyTrendView(days: model.snapshot.dailyTrend, compact: true)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 8)
+                .background(Geist.Colors.background)
+                .clipShape(RoundedRectangle(cornerRadius: Geist.Radius.small, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: Geist.Radius.small, style: .continuous)
+                        .stroke(Geist.Colors.border, lineWidth: 1)
+                )
+        }
+    }
+
     private var agentsSection: some View {
-        VStack(alignment: .leading, spacing: Geist.Spacing.x3) {
-            HStack {
-                Text("Agents")
-                    .font(Geist.Fonts.heading14)
-                    .foregroundStyle(Geist.Colors.primary)
-
-                Spacer()
-
-                Text("\(model.snapshot.agentTotals.count)")
-                    .font(Geist.Fonts.mono12)
+        VStack(alignment: .leading, spacing: 10) {
+            sectionHead(title: "AI Agent") {
+                Text("\(model.snapshot.agentTotals.count) 个来源")
+                    .font(Geist.Fonts.label12)
                     .foregroundStyle(Geist.Colors.secondary)
             }
 
             if model.snapshot.agentTotals.isEmpty {
-                Text("No usage today")
+                Text("今日暂无使用记录")
                     .font(Geist.Fonts.label14)
                     .foregroundStyle(Geist.Colors.secondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.vertical, Geist.Spacing.x2)
+                    .frame(maxWidth: .infinity, minHeight: 42, alignment: .leading)
+                    .padding(.horizontal, 12)
+                    .background(Geist.Colors.background)
+                    .clipShape(RoundedRectangle(cornerRadius: Geist.Radius.small, style: .continuous))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: Geist.Radius.small, style: .continuous)
+                            .stroke(Geist.Colors.border, lineWidth: 1)
+                    )
             } else {
                 VStack(spacing: 0) {
                     ForEach(Array(model.snapshot.agentTotals.enumerated()), id: \.element.id) { index, agent in
@@ -94,36 +97,70 @@ struct PopoverView: View {
 
                         if index < model.snapshot.agentTotals.count - 1 {
                             Divider()
-                                .overlay(Geist.Colors.separator)
+                                .overlay(Geist.Colors.border)
                         }
                     }
                 }
-                .geistPanel(padding: 0, radius: Geist.Radius.small)
+                .background(Geist.Colors.background)
+                .clipShape(RoundedRectangle(cornerRadius: Geist.Radius.small, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: Geist.Radius.small, style: .continuous)
+                        .stroke(Geist.Colors.border, lineWidth: 1)
+                )
             }
         }
     }
 
     private var footer: some View {
-        HStack(spacing: Geist.Spacing.x2) {
-            Button {
-                openManagement()
-            } label: {
-                Label("Manage Sources", systemImage: "slider.horizontal.3")
-                    .labelStyle(.iconOnly)
-            }
-            .buttonStyle(GeistButtonStyle(kind: .tertiary, height: 32))
-            .help("Manage Sources")
+        HStack(spacing: 8) {
+            Text("\(model.snapshot.lastUpdatedAt.formatted(date: .omitted, time: .shortened)) 已同步")
+                .font(Geist.Fonts.mono12)
+                .foregroundStyle(Geist.Colors.secondary)
+                .monospacedDigit()
 
             Spacer()
 
-            Button {
-                quit()
-            } label: {
-                Label("Quit App", systemImage: "power")
-                    .labelStyle(.iconOnly)
+            HStack(spacing: 8) {
+                footerButton("☰", help: "来源管理") {
+                    openManagement(.sources)
+                }
+
+                footerButton("⌁", help: "统计详情") {
+                    openManagement(.stats)
+                }
             }
-            .buttonStyle(GeistButtonStyle(kind: .tertiary, height: 32))
-            .help("Quit App")
         }
+        .padding(.top, 2)
+        .overlay(alignment: .top) {
+            Divider()
+                .overlay(Geist.Colors.border)
+                .offset(y: -8)
+        }
+    }
+
+    private func sectionHead<Trailing: View>(
+        title: String,
+        @ViewBuilder trailing: () -> Trailing
+    ) -> some View {
+        HStack(alignment: .center, spacing: 12) {
+            Text(title)
+                .font(Geist.Fonts.heading14)
+                .foregroundStyle(Geist.Colors.primary)
+
+            Spacer()
+
+            trailing()
+        }
+        .frame(minHeight: 32)
+    }
+
+    private func footerButton(_ title: String, help: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(title)
+                .font(Geist.Fonts.button14)
+                .frame(width: 32, height: 32)
+        }
+        .buttonStyle(GeistButtonStyle(kind: .icon, height: 32))
+        .help(help)
     }
 }

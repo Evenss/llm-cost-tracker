@@ -10,7 +10,8 @@ struct MetricLine: View {
         HStack(alignment: .firstTextBaseline) {
             Text(title)
                 .font(Geist.Fonts.label14)
-                .foregroundStyle(Geist.Colors.secondary)
+                .fontWeight(.semibold)
+                .foregroundStyle(Geist.Colors.primary)
 
             Spacer()
 
@@ -25,6 +26,6 @@ struct MetricLine: View {
                     .monospacedDigit()
             }
         }
-        .padding(.vertical, Geist.Spacing.x2)
+        .frame(minHeight: 58)
     }
 }

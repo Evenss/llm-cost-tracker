@@ -2,21 +2,21 @@ import SwiftUI
 
 enum Geist {
     enum Colors {
-        static let primary = Color(light: "#171717", dark: "#ededed")
-        static let secondary = Color(light: "#4d4d4d", dark: "#a0a0a0")
-        static let disabled = Color(light: "#8f8f8f", dark: "#8f8f8f")
-        static let background = Color(light: "#ffffff", dark: "#000000")
-        static let backgroundSecondary = Color(light: "#fafafa", dark: "#000000")
-        static let neutral = Color(light: "#f2f2f2", dark: "#1a1a1a")
-        static let border = Color(light: "#00000014", dark: "#ffffff24")
-        static let borderHover = Color(light: "#00000036", dark: "#ffffff3d")
-        static let separator = Color(light: "#0000000d", dark: "#ffffff17")
-        static let overlay = Color(light: "#00000015", dark: "#ffffff17")
-        static let blue = Color(light: "#006bff", dark: "#47a8ff")
+        static let primary = Color(light: "#000000", dark: "#000000")
+        static let secondary = Color(light: "#8c8c8c", dark: "#8c8c8c")
+        static let disabled = Color(light: "#8c8c8c", dark: "#8c8c8c")
+        static let background = Color(light: "#ffffff", dark: "#ffffff")
+        static let backgroundSecondary = Color(light: "#f5f5f5", dark: "#f5f5f5")
+        static let neutral = Color(light: "#f5f5f5", dark: "#f5f5f5")
+        static let border = Color(light: "#dbdbdb", dark: "#dbdbdb")
+        static let borderHover = Color(light: "#b8b8b8", dark: "#b8b8b8")
+        static let separator = Color(light: "#dbdbdb", dark: "#dbdbdb")
+        static let overlay = Color(light: "#f5f5f5", dark: "#f5f5f5")
+        static let blue = Color(light: "#1677ff", dark: "#1677ff")
         static let red = Color(light: "#ea001d", dark: "#e2162a")
         static let amber = Color(light: "#aa4d00", dark: "#ff9300")
-        static let green = Color(light: "#107d32", dark: "#00ca50")
-        static let teal = Color(light: "#007f70", dark: "#00cfb7")
+        static let green = blue
+        static let teal = blue
     }
 
     enum Spacing {
@@ -29,10 +29,10 @@ enum Geist {
     }
 
     enum Radius {
-        static let small: CGFloat = 6
-        static let medium: CGFloat = 12
-        static let large: CGFloat = 16
-        static let full: CGFloat = 999
+        static let small: CGFloat = 8
+        static let medium: CGFloat = 8
+        static let large: CGFloat = 8
+        static let full: CGFloat = 8
     }
 
     enum Fonts {
@@ -43,8 +43,8 @@ enum Geist {
         static let label14 = sans(size: 14, weight: .regular)
         static let label13 = sans(size: 13, weight: .regular)
         static let label12 = sans(size: 12, weight: .regular)
-        static let button14 = sans(size: 14, weight: .medium)
-        static let button12 = sans(size: 12, weight: .medium)
+        static let button14 = sans(size: 14, weight: .semibold)
+        static let button12 = sans(size: 13, weight: .semibold)
         static let mono24 = mono(size: 24, weight: .semibold)
         static let mono20 = mono(size: 20, weight: .semibold)
         static let mono14 = mono(size: 14, weight: .medium)
@@ -198,9 +198,9 @@ struct GeistStatusBadge: View {
 
     var body: some View {
         HStack(spacing: Geist.Spacing.x2) {
-            Circle()
+            RoundedRectangle(cornerRadius: 2, style: .continuous)
                 .fill(color)
-                .frame(width: 6, height: 6)
+                .frame(width: 7, height: 7)
 
             Text(text)
                 .font(Geist.Fonts.label12)
@@ -210,9 +210,9 @@ struct GeistStatusBadge: View {
         .padding(.horizontal, Geist.Spacing.x2)
         .frame(height: 24)
         .background(Geist.Colors.background)
-        .clipShape(RoundedRectangle(cornerRadius: Geist.Radius.full, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: Geist.Radius.small, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: Geist.Radius.full, style: .continuous)
+            RoundedRectangle(cornerRadius: Geist.Radius.small, style: .continuous)
                 .stroke(Geist.Colors.border, lineWidth: 1)
         )
     }

@@ -5,40 +5,21 @@ struct SourcesView: View {
     @ObservedObject var model: AppModel
 
     var body: some View {
-        VStack(alignment: .leading, spacing: Geist.Spacing.x4) {
+        VStack(alignment: .leading, spacing: 16) {
             sectionHeader
-
-            VStack(spacing: 0) {
-                tableHeader
-
-                Divider()
-                    .overlay(Geist.Colors.separator)
-
-                if model.snapshot.sourceStates.isEmpty {
-                    emptyState
-                } else {
-                    ForEach(Array(model.snapshot.sourceStates.enumerated()), id: \.element.id) { index, source in
-                        sourceRow(source)
-
-                        if index < model.snapshot.sourceStates.count - 1 {
-                            Divider()
-                                .overlay(Geist.Colors.separator)
-                        }
-                    }
-                }
-            }
-            .geistPanel(padding: 0, radius: Geist.Radius.medium)
+            table
+            note
         }
     }
 
     private var sectionHeader: some View {
-        HStack(alignment: .firstTextBaseline) {
-            VStack(alignment: .leading, spacing: Geist.Spacing.x1) {
-                Text("Sources")
+        HStack(alignment: .top, spacing: 16) {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("采集来源")
                     .font(Geist.Fonts.heading16)
                     .foregroundStyle(Geist.Colors.primary)
 
-                Text("Supported local agents and their read status.")
+                Text("展示支持的本地 AI Agent 日志读取状态。")
                     .font(Geist.Fonts.label13)
                     .foregroundStyle(Geist.Colors.secondary)
             }
@@ -48,36 +29,61 @@ struct SourcesView: View {
             Button {
                 model.refresh()
             } label: {
-                Label(model.isRefreshing ? "Refreshing…" : "Refresh Data", systemImage: "arrow.clockwise")
+                Text(model.isRefreshing ? "✓ 已刷新" : "↻ 刷新")
             }
             .buttonStyle(GeistButtonStyle(kind: .secondary, height: 32))
             .disabled(model.isRefreshing)
         }
     }
 
-    private var tableHeader: some View {
-        HStack(spacing: Geist.Spacing.x4) {
-            Text("Source")
-                .frame(maxWidth: .infinity, alignment: .leading)
-            Text("Enabled")
-                .frame(width: 76, alignment: .leading)
-            Text("Status")
-                .frame(width: 116, alignment: .leading)
-            Text("Synced")
-                .frame(width: 92, alignment: .trailing)
+    private var table: some View {
+        VStack(spacing: 0) {
+            tableHeader
+
+            if model.snapshot.sourceStates.isEmpty {
+                emptyState
+            } else {
+                ForEach(Array(model.snapshot.sourceStates.enumerated()), id: \.element.id) { index, source in
+                    sourceRow(source)
+
+                    if index < model.snapshot.sourceStates.count - 1 {
+                        Divider()
+                            .overlay(Geist.Colors.border)
+                    }
+                }
+            }
         }
-        .font(Geist.Fonts.label12)
+        .background(Geist.Colors.background)
+        .clipShape(RoundedRectangle(cornerRadius: Geist.Radius.small, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: Geist.Radius.small, style: .continuous)
+                .stroke(Geist.Colors.border, lineWidth: 1)
+        )
+    }
+
+    private var tableHeader: some View {
+        HStack(spacing: 16) {
+            Text("来源")
+                .frame(maxWidth: .infinity, alignment: .leading)
+            Text("启用")
+                .frame(width: 90, alignment: .leading)
+            Text("状态")
+                .frame(width: 112, alignment: .leading)
+            Text("同步")
+                .frame(width: 112, alignment: .leading)
+        }
+        .font(Geist.Fonts.label12.weight(.semibold))
         .foregroundStyle(Geist.Colors.secondary)
-        .padding(.horizontal, Geist.Spacing.x4)
+        .padding(.horizontal, 16)
         .frame(height: 36)
         .background(Geist.Colors.backgroundSecondary)
     }
 
     private func sourceRow(_ source: SourceState) -> some View {
-        HStack(spacing: Geist.Spacing.x4) {
-            VStack(alignment: .leading, spacing: Geist.Spacing.x1) {
+        HStack(spacing: 16) {
+            VStack(alignment: .leading, spacing: 3) {
                 Text(source.displayName)
-                    .font(Geist.Fonts.label14)
+                    .font(Geist.Fonts.label14.weight(.semibold))
                     .foregroundStyle(Geist.Colors.primary)
                     .lineLimit(1)
 
@@ -89,29 +95,44 @@ struct SourcesView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
-            Text(source.isEnabled ? "Enabled" : "Disabled")
+            Text(source.isEnabled ? "已启用" : "已停用")
                 .font(Geist.Fonts.label13)
                 .foregroundStyle(source.isEnabled ? Geist.Colors.primary : Geist.Colors.secondary)
-                .frame(width: 76, alignment: .leading)
+                .frame(width: 90, alignment: .leading)
 
-            GeistStatusBadge(text: source.status.displayName, color: statusColor(source.status))
-                .frame(width: 116, alignment: .leading)
+            GeistStatusBadge(text: statusText(source.status), color: statusColor(source.status))
+                .frame(width: 112, alignment: .leading)
 
             Text(syncText(source.lastSyncedAt))
                 .font(Geist.Fonts.mono12)
                 .foregroundStyle(Geist.Colors.secondary)
                 .monospacedDigit()
-                .frame(width: 92, alignment: .trailing)
+                .frame(width: 112, alignment: .leading)
         }
-        .padding(.horizontal, Geist.Spacing.x4)
+        .padding(.horizontal, 16)
         .frame(minHeight: 58)
     }
 
     private var emptyState: some View {
-        Text("No sources found")
+        Text("暂无采集来源")
             .font(Geist.Fonts.label14)
             .foregroundStyle(Geist.Colors.secondary)
             .frame(maxWidth: .infinity, minHeight: 96, alignment: .center)
+    }
+
+    private var note: some View {
+        Text("价格表和模型名映射属于后台逻辑，这里不提供日常配置入口。")
+            .font(Geist.Fonts.label13)
+            .foregroundStyle(Geist.Colors.secondary)
+            .lineSpacing(2)
+            .padding(12)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Geist.Colors.backgroundSecondary)
+            .clipShape(RoundedRectangle(cornerRadius: Geist.Radius.small, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: Geist.Radius.small, style: .continuous)
+                    .stroke(Geist.Colors.border, lineWidth: 1)
+            )
     }
 
     private func detailText(_ source: SourceState) -> String {
@@ -126,14 +147,27 @@ struct SourcesView: View {
         return source.source.defaultRelativePath
     }
 
+    private func statusText(_ status: SourceStatus) -> String {
+        switch status {
+        case .ready:
+            "可读取"
+        case .missing:
+            "未找到"
+        case .disabled:
+            "已停用"
+        case .error:
+            "错误"
+        }
+    }
+
     private func statusColor(_ status: SourceStatus) -> Color {
         switch status {
         case .ready:
-            Geist.Colors.green
+            Geist.Colors.blue
         case .missing:
-            Geist.Colors.amber
+            Geist.Colors.secondary
         case .disabled:
-            Geist.Colors.disabled
+            Geist.Colors.secondary
         case .error:
             Geist.Colors.red
         }

@@ -4,75 +4,113 @@ struct StatsView: View {
     @ObservedObject var model: AppModel
 
     var body: some View {
-        VStack(alignment: .leading, spacing: Geist.Spacing.x4) {
+        VStack(alignment: .leading, spacing: 16) {
             sectionHeader
             metricPanel
             trendPanel
             agentsPanel
             unpricedNotice
-
-            Spacer(minLength: 0)
         }
     }
 
     private var sectionHeader: some View {
-        VStack(alignment: .leading, spacing: Geist.Spacing.x1) {
-            Text("Stats")
-                .font(Geist.Fonts.heading16)
-                .foregroundStyle(Geist.Colors.primary)
+        HStack(alignment: .top, spacing: 16) {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("统计")
+                    .font(Geist.Fonts.heading16)
+                    .foregroundStyle(Geist.Colors.primary)
 
-            Text("Today, week, month, and agent-level spend.")
-                .font(Geist.Fonts.label13)
-                .foregroundStyle(Geist.Colors.secondary)
+                Text("今天、本周、本月与 AI Agent 花费排行。")
+                    .font(Geist.Fonts.label13)
+                    .foregroundStyle(Geist.Colors.secondary)
+            }
+
+            Spacer()
+
+            Button {
+                model.refresh()
+            } label: {
+                Text(model.isRefreshing ? "✓ 已刷新" : "↻ 刷新")
+            }
+            .buttonStyle(GeistButtonStyle(kind: .secondary, height: 32))
+            .disabled(model.isRefreshing)
         }
     }
 
     private var metricPanel: some View {
         VStack(spacing: 0) {
-            MetricLine(title: "Today", usd: model.snapshot.todayUSD, cny: model.snapshot.todayCNY)
+            MetricLine(title: "今日", usd: model.snapshot.todayUSD, cny: model.snapshot.todayCNY)
 
             Divider()
-                .overlay(Geist.Colors.separator)
+                .overlay(Geist.Colors.border)
 
-            MetricLine(title: "This Week", usd: model.snapshot.weekUSD, cny: model.snapshot.weekCNY)
+            MetricLine(title: "本周", usd: model.snapshot.weekUSD, cny: model.snapshot.weekCNY)
 
             Divider()
-                .overlay(Geist.Colors.separator)
+                .overlay(Geist.Colors.border)
 
-            MetricLine(title: "This Month", usd: model.snapshot.monthUSD, cny: model.snapshot.monthCNY)
+            MetricLine(title: "本月", usd: model.snapshot.monthUSD, cny: model.snapshot.monthCNY)
         }
-        .padding(.horizontal, Geist.Spacing.x4)
-        .geistPanel(padding: 0, radius: Geist.Radius.medium)
+        .padding(.horizontal, 16)
+        .background(Geist.Colors.background)
+        .clipShape(RoundedRectangle(cornerRadius: Geist.Radius.small, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: Geist.Radius.small, style: .continuous)
+                .stroke(Geist.Colors.border, lineWidth: 1)
+        )
     }
 
     private var trendPanel: some View {
-        VStack(alignment: .leading, spacing: Geist.Spacing.x3) {
-            DailyTrendView(days: model.snapshot.dailyTrend)
-                .frame(height: 180)
-        }
-        .geistPanel(padding: Geist.Spacing.x4, radius: Geist.Radius.medium)
-    }
-
-    private var agentsPanel: some View {
-        VStack(alignment: .leading, spacing: Geist.Spacing.x3) {
-            HStack {
-                Text("Agents")
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .firstTextBaseline) {
+                Text("每日趋势")
                     .font(Geist.Fonts.heading14)
                     .foregroundStyle(Geist.Colors.primary)
 
                 Spacer()
 
-                Text("\(model.snapshot.agentTotals.count)")
-                    .font(Geist.Fonts.mono12)
+                Text("按天聚合")
+                    .font(Geist.Fonts.label13)
+                    .foregroundStyle(Geist.Colors.secondary)
+            }
+
+            DailyTrendView(days: model.snapshot.dailyTrend)
+        }
+        .padding(16)
+        .background(Geist.Colors.background)
+        .clipShape(RoundedRectangle(cornerRadius: Geist.Radius.small, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: Geist.Radius.small, style: .continuous)
+                .stroke(Geist.Colors.border, lineWidth: 1)
+        )
+    }
+
+    private var agentsPanel: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .firstTextBaseline) {
+                Text("AI Agent")
+                    .font(Geist.Fonts.heading14)
+                    .foregroundStyle(Geist.Colors.primary)
+
+                Spacer()
+
+                Text("今日花费排行")
+                    .font(Geist.Fonts.label13)
                     .foregroundStyle(Geist.Colors.secondary)
             }
 
             if model.snapshot.agentTotals.isEmpty {
-                Text("No usage today")
+                Text("今日暂无使用记录")
                     .font(Geist.Fonts.label14)
                     .foregroundStyle(Geist.Colors.secondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.vertical, Geist.Spacing.x2)
+                    .frame(maxWidth: .infinity, minHeight: 42, alignment: .leading)
+                    .padding(.horizontal, 12)
+                    .background(Geist.Colors.background)
+                    .clipShape(RoundedRectangle(cornerRadius: Geist.Radius.small, style: .continuous))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: Geist.Radius.small, style: .continuous)
+                            .stroke(Geist.Colors.border, lineWidth: 1)
+                    )
             } else {
                 VStack(spacing: 0) {
                     ForEach(Array(model.snapshot.agentTotals.enumerated()), id: \.element.id) { index, agent in
@@ -80,33 +118,42 @@ struct StatsView: View {
 
                         if index < model.snapshot.agentTotals.count - 1 {
                             Divider()
-                                .overlay(Geist.Colors.separator)
+                                .overlay(Geist.Colors.border)
                         }
                     }
                 }
+                .background(Geist.Colors.background)
                 .clipShape(RoundedRectangle(cornerRadius: Geist.Radius.small, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: Geist.Radius.small, style: .continuous)
+                        .stroke(Geist.Colors.border, lineWidth: 1)
+                )
             }
         }
-        .geistPanel(padding: Geist.Spacing.x4, radius: Geist.Radius.medium)
+        .padding(16)
+        .background(Geist.Colors.background)
+        .clipShape(RoundedRectangle(cornerRadius: Geist.Radius.small, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: Geist.Radius.small, style: .continuous)
+                .stroke(Geist.Colors.border, lineWidth: 1)
+        )
     }
 
     @ViewBuilder
     private var unpricedNotice: some View {
         if model.snapshot.unpricedEventCount > 0 {
-            HStack(spacing: Geist.Spacing.x2) {
-                Image(systemName: "exclamationmark.triangle")
-                Text("Some usage could not be priced")
-            }
-            .font(Geist.Fonts.label12)
-            .foregroundStyle(Geist.Colors.amber)
-            .padding(Geist.Spacing.x3)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Geist.Colors.backgroundSecondary)
-            .clipShape(RoundedRectangle(cornerRadius: Geist.Radius.small, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: Geist.Radius.small, style: .continuous)
-                    .stroke(Geist.Colors.border, lineWidth: 1)
-            )
+            Text("有 \(model.snapshot.unpricedEventCount) 条使用记录暂未计价。")
+                .font(Geist.Fonts.label13)
+                .foregroundStyle(Geist.Colors.secondary)
+                .lineSpacing(2)
+                .padding(12)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Geist.Colors.backgroundSecondary)
+                .clipShape(RoundedRectangle(cornerRadius: Geist.Radius.small, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: Geist.Radius.small, style: .continuous)
+                        .stroke(Geist.Colors.border, lineWidth: 1)
+                )
         }
     }
 }

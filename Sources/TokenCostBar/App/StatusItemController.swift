@@ -14,7 +14,7 @@ final class StatusItemController: NSObject {
 
     init(
         model: AppModel,
-        openManagement: @escaping () -> Void,
+        openManagement: @escaping (ManagementTab) -> Void,
         quit: @escaping () -> Void
     ) {
         self.model = model
@@ -23,7 +23,7 @@ final class StatusItemController: NSObject {
         super.init()
 
         configureButton()
-        configurePopover(openManagement: openManagement, quit: quit)
+        configurePopover(openManagement: openManagement)
         bindModel()
     }
 
@@ -38,16 +38,15 @@ final class StatusItemController: NSObject {
         button.action = #selector(togglePopover(_:))
     }
 
-    private func configurePopover(openManagement: @escaping () -> Void, quit: @escaping () -> Void) {
+    private func configurePopover(openManagement: @escaping (ManagementTab) -> Void) {
         popover.behavior = .transient
         popover.animates = true
         popover.delegate = self
-        popover.contentSize = NSSize(width: 390, height: 390)
+        popover.contentSize = NSSize(width: 390, height: 430)
         popover.contentViewController = NSHostingController(
             rootView: PopoverView(
                 model: model,
-                openManagement: openManagement,
-                quit: quit
+                openManagement: openManagement
             )
         )
     }

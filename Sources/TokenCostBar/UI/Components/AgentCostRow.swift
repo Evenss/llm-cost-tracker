@@ -6,9 +6,9 @@ struct AgentCostRow: View {
 
     var body: some View {
         HStack(spacing: Geist.Spacing.x3) {
-            Circle()
+            RoundedRectangle(cornerRadius: 2, style: .continuous)
                 .fill(color)
-                .frame(width: 6, height: 6)
+                .frame(width: 8, height: 8)
 
             Text(agent.source.displayName)
                 .font(Geist.Fonts.label14)
@@ -23,13 +23,13 @@ struct AgentCostRow: View {
                 .monospacedDigit()
         }
         .padding(.horizontal, Geist.Spacing.x3)
-        .frame(minHeight: 36)
+        .frame(minHeight: 42)
     }
 
     private var color: Color {
         switch agent.source {
         case .claudeCode:
-            Geist.Colors.amber
+            Geist.Colors.primary
         case .codex:
             Geist.Colors.blue
         }

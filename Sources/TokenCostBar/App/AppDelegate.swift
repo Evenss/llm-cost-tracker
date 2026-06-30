@@ -18,8 +18,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
             statusItemController = StatusItemController(
                 model: model,
-                openManagement: { [weak self] in
-                    self?.showManagementWindow()
+                openManagement: { [weak self] tab in
+                    self?.showManagementWindow(selectedTab: tab)
                 },
                 quit: {
                     NSApp.terminate(nil)
@@ -33,8 +33,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             self.model = model
             statusItemController = StatusItemController(
                 model: model,
-                openManagement: { [weak self] in
-                    self?.showManagementWindow()
+                openManagement: { [weak self] tab in
+                    self?.showManagementWindow(selectedTab: tab)
                 },
                 quit: {
                     NSApp.terminate(nil)
@@ -43,13 +43,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    private func showManagementWindow() {
+    private func showManagementWindow(selectedTab: ManagementTab = .sources) {
         guard let model else { return }
 
         if managementWindowController == nil {
             managementWindowController = ManagementWindowController(model: model)
         }
 
-        managementWindowController?.showWindow()
+        managementWindowController?.showWindow(selectedTab: selectedTab)
     }
 }

@@ -3,6 +3,8 @@ import SwiftUI
 
 @MainActor
 final class ManagementWindowController: NSWindowController {
+    private let navigation = ManagementNavigation()
+
     init(model: AppModel) {
         let window = ManagementWindow(
             contentRect: NSRect(x: 0, y: 0, width: 760, height: 560),
@@ -13,7 +15,9 @@ final class ManagementWindowController: NSWindowController {
 
         window.title = "TokenCostBar"
         window.minSize = NSSize(width: 680, height: 480)
-        window.contentViewController = NSHostingController(rootView: ManagementView(model: model))
+        window.contentViewController = NSHostingController(
+            rootView: ManagementView(model: model, navigation: navigation)
+        )
 
         super.init(window: window)
     }
@@ -22,8 +26,10 @@ final class ManagementWindowController: NSWindowController {
         nil
     }
 
-    func showWindow() {
+    func showWindow(selectedTab: ManagementTab = .sources) {
         guard let window else { return }
+
+        navigation.selectedTab = selectedTab
 
         if !window.isVisible {
             window.center()

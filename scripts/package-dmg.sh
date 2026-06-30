@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 APP_NAME="TokenCostBar"
-VERSION="0.1.0"
+VERSION="${TOKEN_COST_BAR_VERSION:-0.1.0}"
 BUILD_DIR="$ROOT_DIR/build"
 DIST_DIR="$ROOT_DIR/dist"
 STAGING_DIR="$BUILD_DIR/dmg-staging"

@@ -1,50 +1,86 @@
 # TokenCostBar
 
-A minimal macOS menu bar app for local AI agent usage cost statistics.
+Track AI usage costs from the macOS menu bar.
 
-It reads local Claude Code and Codex usage logs, maps model names to an embedded price catalog, estimates USD cost, converts CNY with a fixed `USD × 7` rule, and shows only the essentials:
+TokenCostBar is a small macOS utility that reads local AI agent usage logs,
+estimates cost with an embedded model price catalog, and keeps the result in the
+menu bar. It is meant to answer one quiet question: how much have my local AI
+agents cost today?
 
-- Today
-- Daily Trend
-- Agents
+## Features
 
-## Run
+- Menu bar display for today's estimated USD cost
+- Lightweight popover with today, recent daily trend, and per-agent totals
+- Management window for source status and broader stats
+- Local SQLite storage
+- Fixed CNY estimate using `USD x 7`
+- GitHub Actions packaging for `.app`, `.app.zip`, and `.dmg` artifacts
+
+## Supported Sources
+
+The current build includes adapters for:
+
+- Claude Code logs under `~/.claude/projects`
+- Codex logs under `~/.codex/sessions`
+
+TokenCostBar only uses local log data. It does not call provider billing APIs.
+
+## Install
+
+Download a packaged build from GitHub:
+
+- Tagged versions publish files on the Releases page.
+- Main-branch builds upload artifacts from the Package workflow.
+
+For everyday use, move `TokenCostBar.app` to `/Applications` and add it to Login
+Items in System Settings.
+
+## Run From Source
+
+Requirements:
+
+- macOS 14 or later
+- Swift 6 / Xcode 16 toolchain
 
 ```bash
 swift run TokenCostBar
 ```
 
-## Package
-
-```bash
-chmod +x scripts/package-app.sh
-scripts/package-app.sh
-open build/TokenCostBar.app
-```
-
-For everyday use, move the packaged app to `/Applications` and add it to Login Items in System Settings.
-
-To create an installable DMG:
-
-```bash
-chmod +x scripts/package-dmg.sh
-scripts/package-dmg.sh
-open dist/TokenCostBar-0.1.0.dmg
-```
-
-## Scan Once
+Run one scan from the command line:
 
 ```bash
 swift run TokenCostBar --scan-once
 ```
 
-For a temporary database during development:
+Use a temporary database during development:
 
 ```bash
 TOKEN_COST_BAR_DATABASE=/tmp/token-cost.sqlite swift run TokenCostBar --scan-once
 ```
 
-## Test
+## Package Locally
+
+Build a `.app` bundle:
+
+```bash
+scripts/package-app.sh
+open build/TokenCostBar.app
+```
+
+Build a DMG:
+
+```bash
+scripts/package-dmg.sh
+open dist/TokenCostBar-0.1.0.dmg
+```
+
+Override the packaged version when needed:
+
+```bash
+TOKEN_COST_BAR_VERSION=0.1.0 TOKEN_COST_BAR_BUILD_NUMBER=1 scripts/package-dmg.sh
+```
+
+## Development
 
 ```bash
 swift test
@@ -52,4 +88,7 @@ swift test
 
 ## Scope
 
-The app intentionally does not show projects, sessions, models, token types, pricing settings, currency settings, subscription amortization, payback ratios, or CSV export.
+TokenCostBar intentionally keeps the UI small. It does not show project,
+session, model, or token-type breakdowns, and it does not provide pricing
+settings, currency settings, subscription amortization, payback calculations, or
+CSV export.

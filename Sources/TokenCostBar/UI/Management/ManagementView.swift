@@ -38,12 +38,6 @@ struct ManagementView: View {
                 Text("管理")
                     .font(Geist.Fonts.heading20)
                     .foregroundStyle(Geist.Colors.primary)
-
-                if navigation.selectedTab == .sources {
-                    Text("低频设置只保留本地来源状态和同步结果。")
-                        .font(Geist.Fonts.label13)
-                        .foregroundStyle(Geist.Colors.secondary)
-                }
             }
 
             Spacer(minLength: 16)

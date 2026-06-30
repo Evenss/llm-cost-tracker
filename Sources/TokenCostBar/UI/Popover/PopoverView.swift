@@ -23,11 +23,10 @@ struct PopoverView: View {
                 Button {
                     model.refresh()
                 } label: {
-                    Text(model.isRefreshing ? "✓" : "↻")
+                    RefreshGlyph(isRefreshing: model.isRefreshing, size: 14)
                         .frame(width: 32, height: 32)
                 }
                 .buttonStyle(GeistButtonStyle(kind: .icon, height: 32))
-                .disabled(model.isRefreshing)
                 .help(model.isRefreshing ? "刷新中" : "刷新数据")
             }
 

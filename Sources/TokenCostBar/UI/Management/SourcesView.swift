@@ -28,10 +28,9 @@ struct SourcesView: View {
             Button {
                 model.refresh()
             } label: {
-                Text(model.isRefreshing ? "✓ 已刷新" : "↻ 刷新")
+                RefreshButtonLabel(isRefreshing: model.isRefreshing)
             }
             .buttonStyle(GeistButtonStyle(kind: .secondary, height: 32))
-            .disabled(model.isRefreshing)
         }
     }
 

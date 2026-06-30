@@ -10,7 +10,7 @@ public struct ScanSummary: Sendable {
     }
 }
 
-public final class ScanCoordinator {
+public final class ScanCoordinator: @unchecked Sendable {
     private let store: SQLiteStore
     private let priceCatalog: PriceCatalog
     private let adapters: [UsageSourceAdapter]

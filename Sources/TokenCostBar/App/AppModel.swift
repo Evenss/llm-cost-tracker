@@ -35,14 +35,20 @@ final class AppModel: ObservableObject {
         guard !isRefreshing else { return }
 
         isRefreshing = true
-        defer { isRefreshing = false }
 
-        do {
-            let summary = try coordinator.scanAll()
-            snapshot = summary.snapshot
-            lastErrorMessage = nil
-        } catch {
-            lastErrorMessage = error.localizedDescription
+        Task { [weak self, coordinator] in
+            do {
+                let summary = try await Task.detached(priority: .userInitiated) {
+                    try coordinator.scanAll()
+                }.value
+
+                self?.snapshot = summary.snapshot
+                self?.lastErrorMessage = nil
+            } catch {
+                self?.lastErrorMessage = error.localizedDescription
+            }
+
+            self?.isRefreshing = false
         }
     }
 }

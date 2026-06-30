@@ -8,7 +8,6 @@ struct SourcesView: View {
         VStack(alignment: .leading, spacing: 16) {
             sectionHeader
             table
-            note
         }
     }
 
@@ -118,21 +117,6 @@ struct SourcesView: View {
             .font(Geist.Fonts.label14)
             .foregroundStyle(Geist.Colors.secondary)
             .frame(maxWidth: .infinity, minHeight: 96, alignment: .center)
-    }
-
-    private var note: some View {
-        Text("价格表和模型名映射属于后台逻辑，这里不提供日常配置入口。")
-            .font(Geist.Fonts.label13)
-            .foregroundStyle(Geist.Colors.secondary)
-            .lineSpacing(2)
-            .padding(12)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Geist.Colors.backgroundSecondary)
-            .clipShape(RoundedRectangle(cornerRadius: Geist.Radius.small, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: Geist.Radius.small, style: .continuous)
-                    .stroke(Geist.Colors.border, lineWidth: 1)
-            )
     }
 
     private func detailText(_ source: SourceState) -> String {

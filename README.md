@@ -17,12 +17,11 @@ Currently supported sources:
 ## Requirements
 
 - macOS 14 or later
-- Swift 6 / Xcode 16 or later only if you package it locally
 
-## Install
+## Download and Install
 
-Download a packaged build from GitHub Releases or the Package workflow
-artifacts.
+Download a packaged build from GitHub Releases. For unreleased builds, use the
+latest Package workflow artifact.
 
 - Open the downloaded DMG, or unzip the `.app.zip` artifact.
 - Move `TokenCostBar.app` to `/Applications`.
@@ -31,15 +30,9 @@ artifacts.
 After launch, TokenCostBar stays in the macOS menu bar. Click the menu bar item
 to view today's cost, recent trend, and per-agent totals.
 
-## Package
+## Build Package
 
-The recommended way to package is GitHub Actions:
-
-- Open the Package workflow in GitHub Actions.
-- Run the workflow on `main`.
-- Download the generated artifact. It includes a DMG and `.app.zip`.
-
-To package locally from a checkout:
+Local packaging requires Swift 6 / Xcode 16 or later.
 
 ```bash
 scripts/package-dmg.sh

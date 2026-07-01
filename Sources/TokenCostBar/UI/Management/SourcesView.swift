@@ -69,7 +69,7 @@ struct SourcesView: View {
         HStack(spacing: 16) {
             Text("来源")
                 .frame(maxWidth: .infinity, alignment: .leading)
-            Text("启用")
+            Text("接入")
                 .frame(width: enabledColumnWidth, height: headerHeight, alignment: .center)
             Text("状态")
                 .frame(width: statusColumnWidth, height: headerHeight, alignment: .center)
@@ -90,9 +90,9 @@ struct SourcesView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .frame(height: rowHeight)
 
-            Text(source.isEnabled ? "已启用" : "已停用")
+            Text(accessText(for: source))
                 .font(Geist.Fonts.label13)
-                .foregroundStyle(source.isEnabled ? Geist.Colors.primary : Geist.Colors.secondary)
+                .foregroundStyle(source.status == .ready ? Geist.Colors.primary : Geist.Colors.secondary)
                 .frame(width: enabledColumnWidth, height: rowHeight, alignment: .center)
 
             SourceStatusDot(status: source.status, color: statusColor(source.status))
@@ -107,6 +107,10 @@ struct SourcesView: View {
             .font(Geist.Fonts.label14)
             .foregroundStyle(Geist.Colors.secondary)
             .frame(maxWidth: .infinity, minHeight: 96, alignment: .center)
+    }
+
+    private func accessText(for source: SourceState) -> String {
+        source.status == .ready ? "已接入" : "未接入"
     }
 
     private func statusColor(_ status: SourceStatus) -> Color {

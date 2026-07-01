@@ -33,9 +33,9 @@ final class StatusItemController: NSObject {
     private func configureButton() {
         guard let button = statusItem.button else { return }
 
-        button.image = Self.makeMenuBarIcon()
-        button.imagePosition = .imageLeading
-        button.title = MoneyFormatter.statusBarUSD(model.snapshot.todayUSD)
+        button.imagePosition = .imageOnly
+        button.imageScaling = .scaleNone
+        updateStatusBarTitle(model.snapshot.todayUSD)
         button.toolTip = "TokenCostBar"
         button.target = self
         button.action = #selector(togglePopover(_:))
@@ -59,9 +59,19 @@ final class StatusItemController: NSObject {
         model.$snapshot
             .receive(on: RunLoop.main)
             .sink { [weak self] snapshot in
-                self?.statusItem.button?.title = MoneyFormatter.statusBarUSD(snapshot.todayUSD)
+                self?.updateStatusBarTitle(snapshot.todayUSD)
             }
             .store(in: &cancellables)
+    }
+
+    private func updateStatusBarTitle(_ value: Decimal) {
+        guard let button = statusItem.button else { return }
+
+        let image = Self.makeStatusBarImage(MoneyFormatter.statusBarUSD(value))
+        statusItem.length = image.size.width + 12
+        button.image = image
+        button.title = ""
+        button.attributedTitle = NSAttributedString(string: "")
     }
 
     @objc
@@ -160,30 +170,65 @@ final class StatusItemController: NSObject {
         }
     }
 
-    private static func makeMenuBarIcon() -> NSImage {
-        let size = NSSize(width: 18, height: 18)
-        let image = NSImage(size: size, flipped: false) { _ in
-            NSColor.black.setStroke()
-            NSColor.black.setFill()
+    private static func makeStatusBarImage(_ title: String) -> NSImage {
+        let iconSize: CGFloat = 18
+        let spacing: CGFloat = 5
+        let font = NSFont.monospacedDigitSystemFont(ofSize: NSFont.systemFontSize, weight: .semibold)
+        let title = NSAttributedString(
+            string: title,
+            attributes: [
+                .font: font,
+                .foregroundColor: NSColor.labelColor
+            ]
+        )
+        let titleSize = title.size()
+        let size = NSSize(
+            width: ceil(iconSize + spacing + titleSize.width),
+            height: iconSize
+        )
 
-            let ring = NSBezierPath()
-            ring.appendArc(
-                withCenter: NSPoint(x: 9, y: 9),
-                radius: 5.3,
-                startAngle: 42,
-                endAngle: -42,
-                clockwise: false
+        let image = NSImage(size: size, flipped: false) { rect in
+            let iconRect = NSRect(x: rect.minX, y: rect.minY, width: iconSize, height: iconSize)
+            drawMenuBarIcon(in: iconRect)
+
+            let titlePoint = NSPoint(
+                x: iconRect.maxX + spacing,
+                y: floor(rect.midY - titleSize.height / 2)
             )
-            ring.lineWidth = 1.7
-            ring.lineCapStyle = .round
-            ring.stroke()
-
-            NSBezierPath(ovalIn: NSRect(x: 11.75, y: 8.05, width: 1.9, height: 1.9)).fill()
+            title.draw(at: titlePoint)
             return true
         }
-        image.isTemplate = true
-        image.accessibilityDescription = "TokenCostBar"
+        image.isTemplate = false
+        image.accessibilityDescription = "TokenCostBar \(title.string)"
         return image
+    }
+
+    private static func drawMenuBarIcon(in rect: NSRect) {
+        NSColor.labelColor.setStroke()
+        NSColor.labelColor.setFill()
+
+        let center = NSPoint(x: rect.midX, y: rect.midY)
+        let ring = NSBezierPath()
+        ring.appendArc(
+            withCenter: center,
+            radius: 5.3,
+            startAngle: 42,
+            endAngle: -42,
+            clockwise: false
+        )
+        ring.lineWidth = 1.7
+        ring.lineCapStyle = .round
+        ring.stroke()
+
+        NSBezierPath(
+            ovalIn: NSRect(
+                x: rect.minX + 11.75,
+                y: rect.minY + 8.05,
+                width: 1.9,
+                height: 1.9
+            )
+        )
+        .fill()
     }
 }
 
